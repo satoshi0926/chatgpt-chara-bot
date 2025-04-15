@@ -1,12 +1,13 @@
 const express = require("express");
 const { Client, middleware } = require("@line/bot-sdk");
+const cors = require("cors")
 const dotenv = require("dotenv");
 const { generateReply } = require("./utils/gpt");
 
 dotenv.config();
 
 const app = express();
-
+app.use(cors())
 // ✅ 👇この直後に入れてOK！
 app.use(express.json()) // JSONリクエストをパース
 
