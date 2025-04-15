@@ -16,7 +16,7 @@ try {
 
 async function generateReply(userMessage) {
   console.log("🟡 GPTに送信するメッセージ:", userMessage);
-  const response = await openai.chat.completions.create({
+  const completion = await openai.chat.completions.create({
     model: "gpt-3.5-turbo",
     messages: [
       { role: "system", content: prompt },
@@ -24,8 +24,8 @@ async function generateReply(userMessage) {
     ],
   });
 
-  console.log("🟢 GPTからの返信:", res.choices[0].message.content);
-  return response.choices[0].message.content;
+  console.log("🟢 GPTからの返信:", completion.choices[0].message.content);
+  return completion.choices[0].message.content;
 }
 
 module.exports = { generateReply };
