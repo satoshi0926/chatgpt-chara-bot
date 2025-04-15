@@ -1,33 +1,44 @@
-require('dotenv').config();
-const express = require('express');
-const line = require('@line/bot-sdk');
+const express = require("express");
+const { Client, middleware } = require("@line/bot-sdk");
+const dotenv = require("dotenv");
+const { generateReply } = require("./utils/gpt");
+
+dotenv.config();
+
+const app = express();
 
 const config = {
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
   channelSecret: process.env.CHANNEL_SECRET,
 };
 
-const app = express();
-const client = new line.Client(config);
+const client = new Client(config);
 
-// Webhookの受信
-app.post('/webhook', line.middleware(config), (req, res) => {
-  Promise
-    .all(req.body.events.map(handleEvent))
-    .then(result => res.json(result));
+app.post("/webhook", middleware(config), async (req, res) => {
+  const events = req.body.events;
+  const results = await Promise.all(
+    events.map(async (event) => {
+      if (event.type === "message" && event.message.type === "text") {
+        const userText = event.message.text;
+
+        try {
+          const replyText = await generateReply(userText); // GPTから返答生成
+          await client.replyMessage(event.replyToken, {
+            type: "text",
+            text: replyText,
+          });
+        } catch (err) {
+          console.error("GPTエラー:", err);
+          await client.replyMessage(event.replyToken, {
+            type: "text",
+            text: "えへへっ……ちょっと考えすぎちゃったかも〜💦",
+          });
+        }
+      }
+    })
+  );
+  res.status(200).send("OK");
 });
-
-// メッセージを受け取ってオウム返しするだけ
-function handleEvent(event) {
-  if (event.type !== 'message' || event.message.type !== 'text') {
-    return Promise.resolve(null);
-  }
-
-  return client.replyMessage(event.replyToken, {
-    type: 'text',
-    text: `ここあ「${event.message.text}」って言ったね♪`,
-  });
-}
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
