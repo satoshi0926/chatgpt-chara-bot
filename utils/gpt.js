@@ -5,7 +5,14 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const systemPrompt = fs.readFileSync("./prompts/cocoa.txt", "utf-8");
+let prompt = "";
+
+try {
+  prompt = fs.readFileSync("./prompts/cocoa.txt", "utf-8");
+  console.log("✅ プロンプト読み込み成功");
+} catch (err) {
+  console.error("❌ プロンプト読み込み失敗:", err);
+}
 
 async function generateReply(userText) {
   console.log("🟡 GPTに送信するメッセージ:", userMessage);
