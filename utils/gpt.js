@@ -14,7 +14,7 @@ try {
   console.error("❌ プロンプト読み込み失敗:", err);
 }
 
-async function generateReply(userText) {
+async function generateReply(userMessage) {
   console.log("🟡 GPTに送信するメッセージ:", userMessage);
   const response = await openai.chat.completions.create({
     model: "gpt-3.5-turbo",
