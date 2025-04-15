@@ -19,8 +19,8 @@ async function generateReply(userMessage) {
   const response = await openai.chat.completions.create({
     model: "gpt-3.5-turbo",
     messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userText },
+      { role: "system", content: prompt },
+      { role: "user", content: userMessage },
     ],
   });
 
