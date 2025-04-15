@@ -1,0 +1,10 @@
+# 機密ファイル
+.env
+
+# Node系不要ファイル
+node_modules/
+package-lock.json
+
+# エディタ関係
+.DS_Store
+*.log
