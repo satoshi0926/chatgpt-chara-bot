@@ -1,31 +1,41 @@
-const OpenAI = require("openai");
 const fs = require("fs");
+const { OpenAI } = require("openai");
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-let prompt = "";
+// 👇 シーンごとの追加プロンプト
+const promptMap = {
+  gorone: `
+【現在の状況】
+・ヒロインは部屋着でゴロゴロしている
+・だらけた口調で無防備に過ごしている
+・床やクッションに寝転びながら、スマホをいじっている
+・胸や太ももが強調される体勢だが、本人は無自覚
+  `,
+  school: `
+【現在の状況】
+・ヒロインは制服姿
+・放課後の教室 or 階段で会話中
+・スカートやシャツの乱れ、汗などが自然と目立っている
+・ちょっと恥ずかしがっている
+  `,
+};
 
-try {
-  prompt = fs.readFileSync("./prompts/cocoa.txt", "utf-8");
-  console.log("✅ プロンプト読み込み成功");
-} catch (err) {
-  console.error("❌ プロンプト読み込み失敗:", err);
-}
+const basePrompt = fs.readFileSync("./prompts/cocoa.txt", "utf-8");
 
-async function generateReply(userMessage) {
-  console.log("🟡 GPTに送信するメッセージ:", userMessage);
-  const completion = await openai.chat.completions.create({
+async function generateReply(userMessage, scene = "gorone") {
+  const scenePrompt = promptMap[scene] || "";
+  const fullPrompt = `${basePrompt}\n${scenePrompt}`;
+
+  const res = await openai.chat.completions.create({
     model: "gpt-3.5-turbo",
     messages: [
-      { role: "system", content: prompt },
+      { role: "system", content: fullPrompt },
       { role: "user", content: userMessage },
     ],
   });
 
-  console.log("🟢 GPTからの返信:", completion.choices[0].message.content);
-  return completion.choices[0].message.content;
+  return res.choices[0].message.content;
 }
 
 module.exports = { generateReply };

@@ -13,16 +13,15 @@ app.use(express.json()) // JSONリクエストをパース
 
 // ✅ ここに /gpt エンドポイント追加！
 app.post("/gpt", async (req, res) => {
-  const userText = req.body.message;
-  console.log("🔵 /gpt にリクエストが来ました:", userText); 
+  const { message, scene } = req.body;
+  console.log("🟢 /gptリクエスト:", message, "scene:", scene);
+
   try {
-    const reply = await generateReply(userText);
+    const reply = await generateReply(message, scene);
     res.json({ reply });
   } catch (err) {
     console.error("GPTエラー:", err);
-    res.status(500).json({
-      reply: "えへへっ……ちょっと考えすぎちゃったかも〜💦",
-    });
+    res.status(500).json({ reply: "えへへっ……ちょっと考えすぎちゃったかも〜💦" });
   }
 });
 
