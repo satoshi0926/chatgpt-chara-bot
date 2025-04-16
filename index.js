@@ -11,18 +11,20 @@ app.use(cors())
 // ✅ 👇この直後に入れてOK！
 app.use(express.json()) // JSONリクエストをパース
 
-// ✅ ここに /gpt エンドポイント追加！
 app.post("/gpt", async (req, res) => {
-  const { message, scene } = req.body;
-  console.log("🟢 /gptリクエスト:", message, "scene:", scene);
+  const userText = req.body.message;
+  const scene = req.body.scene || "default";
+
+  console.log("🟢 /gptリクエスト:", userText, "scene:", scene);
 
   try {
-    const reply = await generateReply(message, scene);
+    const reply = await generateReply(userText, scene);
     res.json({ reply });
-    console.log("🟢 GPTに渡すscene:", scene);
   } catch (err) {
     console.error("GPTエラー:", err);
-    res.status(500).json({ reply: "えへへっ……ちょっと考えすぎちゃったかも〜💦" });
+    res.status(500).json({
+      reply: "えへへっ……ちょっと考えすぎちゃったかも〜💦",
+    });
   }
 });
 

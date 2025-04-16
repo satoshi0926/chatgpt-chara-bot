@@ -1,6 +1,7 @@
 const fs = require("fs");
 require("dotenv").config();
 const { OpenAI } = require("openai");
+const path = require("path");
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -24,19 +25,22 @@ const promptMap = {
 
 const basePrompt = fs.readFileSync("./prompts/cocoa.txt", "utf-8");
 
-async function generateReply(userMessage, scene = "gorone") {
-  const scenePrompt = promptMap[scene] || "";
-  const fullPrompt = `${basePrompt}\n${scenePrompt}`;
+async function generateReply(userMessage, scene = "default") {
+  console.log("🟡 GPTに送信するメッセージ:", userMessage);
 
-  const res = await openai.chat.completions.create({
+  const promptPath = path.join(__dirname, `../prompts/${scene}.txt`);
+  const systemPrompt = fs.readFileSync(promptPath, "utf-8");
+
+  const response = await openai.chat.completions.create({
     model: "gpt-3.5-turbo",
     messages: [
-      { role: "system", content: fullPrompt },
+      { role: "system", content: systemPrompt },
       { role: "user", content: userMessage },
     ],
   });
 
-  return res.choices[0].message.content;
+  console.log("🟢 GPTからの返信:", response.choices[0].message.content);
+  return response.choices[0].message.content;
 }
 
 module.exports = { generateReply };
