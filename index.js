@@ -19,6 +19,7 @@ app.post("/gpt", async (req, res) => {
   try {
     const reply = await generateReply(message, scene);
     res.json({ reply });
+    console.log("🟢 GPTに渡すscene:", scene);
   } catch (err) {
     console.error("GPTエラー:", err);
     res.status(500).json({ reply: "えへへっ……ちょっと考えすぎちゃったかも〜💦" });
@@ -41,6 +42,7 @@ app.post("/webhook", middleware(config), async (req, res) => {
 
         try {
           const replyText = await generateReply(userText); // GPTから返答生成
+          console.log("🟢 GPTからの返答:", replyText);
           await client.replyMessage(event.replyToken, {
             type: "text",
             text: replyText,
@@ -61,4 +63,17 @@ app.post("/webhook", middleware(config), async (req, res) => {
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`LINE bot listening on port ${port}`);
+});
+
+const { getLinesByTagOrScene } = require("./getLines");
+
+app.post("/line-db", async (req, res) => {
+  const { tag, scene } = req.body;
+  try {
+    const line = await getLinesByTagOrScene(tag, scene);
+    res.json({ reply: line });
+  } catch (err) {
+    console.error("セリフ取得エラー:", err);
+    res.status(500).json({ reply: "セリフが見つかりませんでした💦" });
+  }
 });
